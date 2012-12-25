@@ -1,37 +1,36 @@
-//Node dependencies
-var express = require("express"),
-    http = require("http"),
-    path = require("path"),
-    engine = require("ejs-locals");
+/* Node dependencies */
+var express = require('express'),
+	http = require('http'),
+	path = require('path'),
+	engine = require('ejs-locals');
 
-//Application
+var routes = require('./config/routes'),
+	environments = require('./config/environments');
+
+/* Application */
 var app = express();
 
-//MVC dependencies
-var config = require("./config/application").config,
-    routes = require("./config/routes").routes(app);
-
-//App configuration
 app.configure(function() {
-    app.set("port", process.env.PORT || config.port);
-    app.set("views", __dirname + config.views_path);
-    app.engine("ejs", engine);
-    app.set("view engine", "ejs");
-    app.use(express.favicon());
-    app.use(express.logger('dev'));
-    app.use(express.bodyParser());
-    app.use(express.methodOverride());
-    app.use(app.router);
-    app.use(express.static(path.join(__dirname, config.public_path)));
+	app.set('port', process.env.PORT || 3000);
+	app.engine('ejs', engine);
+	app.set('views', __dirname + '/app/views');
+	app.set('view engine', 'ejs');
+	app.use(express.favicon());
+	app.use(express.logger('dev'));
+	app.use(express.bodyParser());
+	app.use(express.methodOverride());
+	app.use(app.router);
+	app.use(express.static(path.join(__dirname, 'public')));
 });
 
-app.configure("development", function(){
-    app.use(express.errorHandler());
+app.configure("development", function() {
+	app.use(express.errorHandler());
 });
 
-app.get("/", routes.index);
+/* Main */
+routes.main(app, require('./app/controllers/main'));
 
-//Server
-http.createServer(app).listen(app.get("port"), function(){
-    console.log("Express server listening on port " + app.get("port"));
+/* Server */
+http.createServer(app).listen(app.get('port'), function() {
+	console.log("Server listening on port " + app.get('port'));
 });
